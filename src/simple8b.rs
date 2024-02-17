@@ -25,22 +25,22 @@ pub fn simple8b_encode(data: &[u64]) -> Vec<u64> {
     return encoded_data;
 }
 
-pub fn simple8b_decode(data: &[u64]) -> Vec<u64> {
-    let mut decoded: Vec<u64> = Vec::new();
-    for word in 0..data.len() {
-        let unpacked = unpack(data[word as usize]);
-    }
-}
-
-fn unpack(word: u64) -> Vec<u64> {
-    let mut decoded_words: Vec<u64> = Vec::new();
-    let selector = word >> 60;
-    let bits_per_int = BPI[word as usize];
-    let encoded_words = INTEGERS_CODED[word as usize];
-    for w in 0..encoded_words {
-       let decoded_word =  
-    }
-}
+//pub fn simple8b_decode(data: &[u64]) -> Vec<u64> {
+//    let mut decoded: Vec<u64> = Vec::new();
+//    for word in 0..data.len() {
+//        let unpacked = unpack(data[word as usize]);
+//    }
+//}
+//
+//fn unpack(word: u64) -> Vec<u64> {
+//    let mut decoded_words: Vec<u64> = Vec::new();
+//    let selector = word >> 60;
+//    let bits_per_int = BPI[word as usize];
+//    let encoded_words = INTEGERS_CODED[word as usize];
+//    for w in 0..encoded_words {
+//       let decoded_word =  
+//    }
+//}
 
 fn pack(data: &[u64], selector: u8, integers_coded: u8, num_bits: u8) -> u64 {
     let mut packed: u64 = u64::from(selector) << 60;
