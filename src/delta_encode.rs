@@ -33,10 +33,16 @@ where
     T: Clone,
     T: Default,
 {
-    let delta_encoded = delta_encode(&data);
-    let mut delta_delta = vec![delta_encoded.first().unwrap().clone()];
-    delta_delta.append(&mut delta_encode(&delta_encoded[1..]));
-    return delta_delta;
+    let first_point = data[0].clone();
+    let mut output = vec![first_point.clone()];
+    let second_point = data[1].clone();
+    output.push(&second_point - &first_point);
+    for (mut idx, _) in data[2..].iter().enumerate() {
+        idx = idx + 2;
+        let point = &(&data[idx] - &data[idx - 1]) - &(&data[idx - 1] - &data[idx - 2]);
+        output.push(point);
+    }
+    return output;
 }
 
 pub fn delta_decode<T>(data: &[T]) -> Vec<T>
