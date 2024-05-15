@@ -1,7 +1,5 @@
 use itertools::izip;
-use std::{collections::HashMap, mem::size_of};
-
-use num::{self, PrimInt};
+use std::mem::size_of;
 
 const SELECTOR_VALUE: [u8; 16] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 const INTEGERS_CODED: [u8; 16] = [240, 120, 60, 30, 20, 15, 12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
@@ -25,22 +23,36 @@ pub fn simple8b_encode(data: &[u64]) -> Vec<u64> {
     return encoded_data;
 }
 
-//pub fn simple8b_decode(data: &[u64]) -> Vec<u64> {
-//    let mut decoded: Vec<u64> = Vec::new();
-//    for word in 0..data.len() {
-//        let unpacked = unpack(data[word as usize]);
-//    }
-//}
-//
-//fn unpack(word: u64) -> Vec<u64> {
-//    let mut decoded_words: Vec<u64> = Vec::new();
-//    let selector = word >> 60;
-//    let bits_per_int = BPI[word as usize];
-//    let encoded_words = INTEGERS_CODED[word as usize];
-//    for w in 0..encoded_words {
-//       let decoded_word =  
-//    }
-//}
+pub fn simple8b_decode(data: &[u64]) -> Vec<u64> {
+    let mut decoded: Vec<u64> = Vec::new();
+    for word in 0..data.len() {
+        let unpacked = unpack(data[word as usize]);
+        decoded.extend(unpacked);
+    }
+    return decoded;
+}
+
+fn unpack(word: u64) -> Vec<u64> {
+    let mut decoded_words: Vec<u64> = Vec::new();
+    let selector = word >> 60;
+    let bits_per_int = BPI[selector as usize];
+    let encoded_words = INTEGERS_CODED[selector as usize];
+    println!(
+        "selector: {}, bpi {}, ew {}",
+        selector, bits_per_int, encoded_words
+    );
+
+    let bitmask = (u64::MAX >> (64 - bits_per_int)) << (64 - bits_per_int);
+    println!("bitmask {:^0x}", bitmask);
+
+    for w in 0..encoded_words {
+        let temp_mask = bitmask >> (4 + (w * bits_per_int));
+        println!("temp mask {:^016x}", temp_mask);
+        let x = (word & temp_mask) >> (60 - bits_per_int) - (bits_per_int * w);
+        decoded_words.push(x);
+    }
+    return decoded_words;
+}
 
 fn pack(data: &[u64], selector: u8, integers_coded: u8, num_bits: u8) -> u64 {
     let mut packed: u64 = u64::from(selector) << 60;
@@ -99,11 +111,9 @@ mod tests {
     fn test_pack_all_bytes() {
         let test_data: Vec<u64> = vec![255; 7];
         let packed = pack(&test_data, 9, 7, 8);
-        println!("Packed: {:x}", packed);
         let correct: u64 = 0x9FFFFFFFFFFFFFF0;
         assert_eq!(packed, correct);
     }
-
 
     #[test]
     fn test_can_pack_ones() {
@@ -154,8 +164,27 @@ mod tests {
         let mut test_data_2 = vec![255; 7 * 2];
         test_data.append(&mut test_data_2);
         let encoded = simple8b_encode(&test_data);
-        println!("Encoded: {:x?}", encoded);
-        let correct: Vec<u64> = vec![0x2FFFFFFFFFFFFFFF, 0x2FFFFFFFFFFFFFFF, 0x9FFFFFFFFFFFFFF0, 0x9FFFFFFFFFFFFFF0];
+        let correct: Vec<u64> = vec![
+            0x2FFFFFFFFFFFFFFF,
+            0x2FFFFFFFFFFFFFFF,
+            0x9FFFFFFFFFFFFFF0,
+            0x9FFFFFFFFFFFFFF0,
+        ];
         assert_eq!(encoded, correct);
+    }
+
+    #[test]
+    fn test_round_trips() {
+        let test_data = vec![1; 60];
+        let encoded = simple8b_encode(&test_data);
+        let decoded = simple8b_decode(&encoded);
+        assert_eq!(test_data, decoded);
+
+        let mut test_data = vec![1; 60 * 2];
+        let mut test_data_2 = vec![255; 7 * 2];
+        test_data.append(&mut test_data_2);
+        let encoded = simple8b_encode(&test_data);
+        let decoded = simple8b_decode(&encoded);
+        assert_eq!(test_data, decoded);
     }
 }
