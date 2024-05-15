@@ -1,4 +1,7 @@
-use std::{fmt::{Debug, Display}, ops::{Add, Sub}};
+use std::{
+    fmt::{Debug, Display},
+    ops::{Add, Sub},
+};
 
 pub fn delta_encode<T>(data: &[T]) -> Vec<T>
 where
@@ -54,14 +57,14 @@ where
     let mut output = vec![data[0].clone()];
     let mut prev = data[0].clone();
     for val in data[1..].iter() {
-        let s  = &prev + val; 
+        let s = &prev + val;
         output.push(s.clone());
-        prev = s; 
+        prev = s;
     }
-    return output
+    return output;
 }
 
-pub fn delta_delta_decode<T>(data: &[T]) -> Vec<T> 
+pub fn delta_delta_decode<T>(data: &[T]) -> Vec<T>
 where
     for<'a> &'a T: Add<&'a T, Output = T>,
     T: Clone,
