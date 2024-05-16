@@ -78,7 +78,7 @@ mod tests {
 
     #[test]
     fn test_xor() {
-        let test_data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let test_data = vec![12., 24., 15., 12., 35.];
         let encoded = xor_float_encode(&test_data);
         println!("Test data");
         for d in test_data {
