@@ -1,16 +1,16 @@
 #[derive(PartialEq, Debug)]
 pub struct RunPair {
-    value: usize,
+    value: isize,
     run: usize,
 }
 
 impl RunPair {
-    pub fn as_bytes(&self) -> (usize, usize) {
+    pub fn as_bytes(&self) -> (isize, usize) {
         return (self.value, self.run);
     }
 }
 
-pub fn rle_encode(data: &[usize]) -> Vec<RunPair> {
+pub fn rle_encode(data: &[isize]) -> Vec<RunPair> {
     let mut encoded_data = Vec::<RunPair>::new();
     let mut current_run_value = data.iter().next().unwrap();
     let mut current_run_len: usize = 0;
