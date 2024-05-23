@@ -4,10 +4,13 @@ pub struct RunPair {
     run: usize,
 }
 
-pub fn rle_encode<T>(data: &[T]) -> Vec<RunPair>
-where
-    T: num::PrimInt + Ord + num::NumCast,
-{
+impl RunPair {
+    pub fn as_bytes(&self) -> (usize, usize) {
+        return (self.value, self.run);
+    }
+}
+
+pub fn rle_encode(data: &[usize]) -> Vec<RunPair> {
     let mut encoded_data = Vec::<RunPair>::new();
     let mut current_run_value = data.iter().next().unwrap();
     let mut current_run_len: usize = 0;
@@ -16,7 +19,7 @@ where
             current_run_len += 1;
         } else {
             encoded_data.push(RunPair {
-                value: current_run_value.to_usize().unwrap(),
+                value: current_run_value.clone(),
                 run: current_run_len,
             });
             current_run_value = val;
@@ -24,7 +27,7 @@ where
         }
     }
     encoded_data.push(RunPair {
-        value: current_run_value.to_usize().unwrap(),
+        value: current_run_value.clone(),
         run: current_run_len,
     });
     return encoded_data;
@@ -48,4 +51,3 @@ mod tests {
         assert_eq!(truth, encoded_data)
     }
 }
-
