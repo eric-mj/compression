@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 #[derive(PartialEq, Debug)]
 pub struct RunPair {
     value: isize,
@@ -5,8 +7,9 @@ pub struct RunPair {
 }
 
 impl RunPair {
-    pub fn as_bytes(&self) -> (isize, usize) {
-        return (self.value, self.run);
+    // There's gotta be a better return type, but tuples are iterable
+    pub fn as_bytes(&self) -> Vec<usize> {
+        return vec![self.value as usize, self.run];
     }
 }
 
@@ -33,6 +36,15 @@ pub fn rle_encode(data: &[isize]) -> Vec<RunPair> {
     return encoded_data;
 }
 
+// Need to do error checking
+pub fn rle_decode(data: &[u64]) -> Vec<isize> {
+    let mut decoded = Vec::<isize>::new();
+    for (value, run) in data.iter().tuples() {
+        decoded.extend(vec![value.clone() as isize; run.clone() as usize]);
+    }
+    return decoded;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -49,5 +61,14 @@ mod tests {
             RunPair { value: 5, run: 1 },
         ];
         assert_eq!(truth, encoded_data)
+    }
+
+    #[test]
+    fn test_rle_decode() {
+        let test_data = vec![1, 5, 2, 4, 3, 2, 4, 1, 5, 1];
+
+        let correct = vec![1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 5];
+        let decoded = rle_decode(&test_data);
+        assert_eq!(correct, decoded);
     }
 }
