@@ -7,6 +7,7 @@ pub mod simple8b;
 #[cfg(test)]
 mod tests {
     use self::{
+        delta_encode::{delta_delta_decode, delta_delta_encode},
         rle::{rle_decode, rle_encode},
         simple8b::{simple8b_decode, simple8b_encode},
     };
@@ -39,5 +40,21 @@ mod tests {
         let unpacked = simple8b_decode(&packed);
         let decoded = rle_decode(&unpacked);
         assert_eq!(decoded, test_data);
+    }
+
+    #[test]
+    fn test_delta_delta_rle_packing() {
+        let test_data: Vec<i32> = (1..100).collect();
+        let compressed = simple8b_encode(
+            &delta_delta_encode(&test_data)
+                .iter()
+                .map(|x| *x as u64)
+                .collect::<Vec<u64>>(),
+        );
+        let decompressed = delta_delta_decode(&simple8b_decode(&compressed))
+            .iter()
+            .map(|x| *x as i32)
+            .collect::<Vec<i32>>();
+        assert_eq!(test_data, decompressed);
     }
 }
